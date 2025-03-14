@@ -300,7 +300,7 @@ def main_parser() -> argparse.ArgumentParser:
                 This is recommended as it will ensure the sdist can be used
                 to build wheels.
 
-                Pass -s/--sdist and/or -w/--wheel to build a specific distribution.
+                Pass -s/--sdist and/or -w/--wheel and/or -e/--editable to build a specific distribution.
                 If you do this, the default behavior will be disabled, and all
                 artifacts will be built from {srcdir} (even if you combine
                 -w/--wheel with -s/--sdist, the wheel will be built from {srcdir}).
@@ -348,6 +348,14 @@ def main_parser() -> argparse.ArgumentParser:
         action='append_const',
         const='wheel',
         help='build a wheel (disables the default behavior)',
+    )
+    parser.add_argument(
+        '--editable',
+        '-e',
+        dest='distributions',
+        action='append_const',
+        const='editable',
+        help='build an editable distribution (disables the default behavior)',
     )
     parser.add_argument(
         '--outdir',
