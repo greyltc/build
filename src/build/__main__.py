@@ -434,8 +434,8 @@ def main(cli_args: Sequence[str], prog: str | None = None) -> None:
         distributions = ['wheel']
 
     with _handle_build_error():
-        if "editable" in distributions and "wheel" in distributions:
-            _error("wheel and editable distribution types can not be built at the same time")
+        if "editable" in distributions and len(distributions) > 1:
+            _error('Building an editable type distribution can not be combined with any other type.')
         built = build_call(
             args.srcdir,
             outdir,
