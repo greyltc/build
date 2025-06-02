@@ -46,7 +46,11 @@ def test_can_get_venv_paths_with_conflicting_default_scheme(
     assert get_scheme_names.call_count == 1
 
 
-@pytest.mark.skipif('posix_local' not in sysconfig.get_scheme_names(), reason='workaround for Debian/Ubuntu Python')
+SCHEME_NAMES = sysconfig.get_scheme_names()
+
+
+@pytest.mark.skipif('posix_local' not in SCHEME_NAMES, reason='workaround for Debian/Ubuntu Python')
+@pytest.mark.skipif('venv' in SCHEME_NAMES, reason='different call if venv is in scheme names')
 def test_can_get_venv_paths_with_posix_local_default_scheme(
     mocker: pytest_mock.MockerFixture,
 ):
@@ -267,10 +271,6 @@ def test_venv_creation(
         pytest.param(
             'uv',
             marks=[
-                pytest.mark.xfail(
-                    IS_PYPY and IS_WINDOWS and sys.version_info < (3, 9),
-                    reason='uv cannot find PyPy 3.8 executable on Windows',
-                ),
                 pytest.mark.skipif(MISSING_UV, reason='uv executable not found'),
             ],
         ),

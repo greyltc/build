@@ -37,7 +37,7 @@ _COLORS = {
     'underline': '\33[4m',
     'reset': '\33[0m',
 }
-_NO_COLORS = {color: '' for color in _COLORS}
+_NO_COLORS = dict.fromkeys(_COLORS, '')
 
 
 _styles = contextvars.ContextVar('_styles', default=_COLORS)
@@ -69,7 +69,7 @@ def _showwarning(
 
 
 _max_terminal_width = shutil.get_terminal_size().columns - 2
-if _max_terminal_width <= 0:
+if _max_terminal_width <= 0:  # pragma: no cover
     _max_terminal_width = 78
 
 
@@ -191,7 +191,7 @@ def _handle_build_error() -> Iterator[None]:
                 limit=-1,
             )
             tb = ''.join(tb_lines)
-        else:
+        else:  # pragma: no cover
             tb = traceback.format_exc(-1)
         _cprint('\n{dim}{}{reset}\n', tb.strip('\n'))
         _error(str(e))
@@ -289,7 +289,13 @@ def main_parser() -> argparse.ArgumentParser:
     """
     Construct the main parser.
     """
-    parser = argparse.ArgumentParser(
+    formatter_class = partial(argparse.RawDescriptionHelpFormatter, width=min(_max_terminal_width, 127))
+    # Workaround for 3.14.0 beta 1, can remove once beta 2 is out
+    if sys.version_info >= (3, 14):
+        formatter_class = partial(formatter_class, color=True)
+
+    make_parser = partial(
+        argparse.ArgumentParser,
         description=textwrap.indent(
             textwrap.dedent(
                 """
@@ -309,9 +315,13 @@ def main_parser() -> argparse.ArgumentParser:
             '    ',
         ),
         # Prevent argparse from taking up the entire width of the terminal window
-        # which impedes readability.
-        formatter_class=partial(argparse.RawDescriptionHelpFormatter, width=min(_max_terminal_width, 127)),
+        # which impedes readability. Also keep the description formatted.
+        formatter_class=formatter_class,
     )
+    if sys.version_info >= (3, 14):
+        make_parser = partial(make_parser, suggest_on_error=True, color=True)
+
+    parser = make_parser()
     parser.add_argument(
         'srcdir',
         type=str,
