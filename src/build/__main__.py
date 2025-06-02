@@ -367,6 +367,7 @@ def main_parser() -> argparse.ArgumentParser:
         const='editable',
         help='build an editable wheel (disables the default behavior). '
         'Can not be combined with other distribution build types',
+        'Editable wheel files can not be distributed to end users',
     )
     parser.add_argument(
         '--outdir',
@@ -445,8 +446,10 @@ def main(cli_args: Sequence[str], prog: str | None = None) -> None:
         distributions = ['wheel']
 
     with _handle_build_error():
-        if "editable" in distributions and len(distributions) > 1:
-            _error('Building an editable type distribution can not be combined with any other type.')
+        if "editable" in distributions:
+            _cprint('{bold}{yellow}WARNING: Editable wheels can not be distributed to end users.{reset}')
+            if len(distributions) > 1:
+                _error('Building an editable type distribution can not be combined with any other type.')
         built = build_call(
             args.srcdir,
             outdir,
